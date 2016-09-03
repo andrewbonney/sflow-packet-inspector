@@ -7,6 +7,7 @@ import SocketServer
 import time
 import thread
 import traceback
+import datetime
 
 HTTP_PORT=8000
 
@@ -146,8 +147,9 @@ def writeMessage(type, message, output_file):
         type = "UNKNOWN"
         styled_type = "<span style='color: #000000; font-weight: bold'>{}:</span>".format(type)
 
-    print "{}: {}\n".format(type, message)
-    output_file.write("{} {}<br /><br />\n".format(styled_type, message.replace("\n", "<br />\n")))
+    dt = datetime.datetime.now()
+    print "{} - {}: {}\n".format(dt, type, message)
+    output_file.write("{} - {} {}<br /><br />\n".format(dt, styled_type, message.replace("\n", "<br />\n")))
 
 
 if __name__ == "__main__":
