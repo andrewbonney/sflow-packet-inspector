@@ -129,7 +129,7 @@ class sFlowTests():
             if sample.dst_mac[0:6] != "01005e":
                 return sFlowTestResult(True, "Dest MAC is not a valid multicast MAC", sample)
             else:
-                correct_mac = "01005e" + hex(int(sample.dst_ip.split(".")[1]) & 0x7F)[2:] + hex(int(sample.dst_ip.split(".")[2]))[2:] + hex(int(sample.dst_ip.split(".")[3]))[2:]
+                correct_mac = "01005e" + hex(int(sample.dst_ip.split(".")[1]) & 0x7F)[2:].zfill(2) + hex(int(sample.dst_ip.split(".")[2]))[2:].zfill(2) + hex(int(sample.dst_ip.split(".")[3]))[2:].zfill(2)
                 if sample.dst_mac != correct_mac:
                     return sFlowTestResult(True, "Dest MAC does not match the multicast IP address", sample)
 
