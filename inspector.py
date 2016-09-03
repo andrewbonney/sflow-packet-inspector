@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import sys
+import os
 import SimpleHTTPServer
 import SocketServer
 import time
@@ -135,18 +136,32 @@ class sFlowTests():
         return sFlowTestResult(False)
 
 
+def writeMessage(type, message, output_file):
+    styled_type = None
+    if type == "ERROR":
+        styled_type = "<span style='color: #ff0000; font-weight: bold'>{}:</span>".format(type)
+    elif type == "WARNING":
+        styled_type = "<span style='color: #ffa500; font-weight: bold'>{}:</span>".format(type)
+    else:
+        type = "UNKNOWN"
+        styled_type = "<span style='color: #000000; font-weight: bold'>{}:</span>".format(type)
+
+    print "{}: {}\n".format(type, message)
+    output_file.write("{} {}<br /><br />\n".format(styled_type, message.replace("\n", "<br />\n")))
+
+
 if __name__ == "__main__":
     if len(sys.argv) != 2:
         print "python inspector.py <sflow-file-name>"
     else:
         tests = sFlowTests()
-        output_file = open("index.html", "w", 0)
+        output_file = open("html/output.html", "w", 0)
         sflow_file = open(sys.argv[1], 'r')
+        os.chdir("html")
         handler = SimpleHTTPServer.SimpleHTTPRequestHandler
         httpd = SocketServer.TCPServer(("", HTTP_PORT), handler)
         thread.start_new_thread(httpd.serve_forever, ())
         print "* Starting HTTP server on port {}\n".format(HTTP_PORT)
-        output_file.write('<head><title>sFlow Packet Inspector</title><meta http-equiv="refresh" content="10"></head>\n')
         try:
             while True:
                 new_line = sflow_file.readline()
@@ -154,12 +169,10 @@ if __name__ == "__main__":
                     sample = sFlowSample(new_line)
                     result = tests.testBadMAC(sample)
                     if result.isError():
-                        print "ERROR: {}\n".format(result.getMessage())
-                        output_file.write("ERROR: {}<br /><br />\n".format(result.getMessage().replace("\n", "<br />\n")))
+                        writeMessage("ERROR", result.getMessage(), output_file)
                     result = tests.testIncorrectMulticastMAC(sample)
                     if result.isError():
-                        print "ERROR: {}\n".format(result.getMessage())
-                        output_file.write("ERROR: {}<br /><br />\n".format(result.getMessage().replace("\n", "<br />\n")))
+                        writeMessage("ERROR", result.getMessage(), output_file)
                 elif new_line and new_line[0:4] == "CNTR":
                     sample = sFlowCounter(new_line)
                 elif not new_line:

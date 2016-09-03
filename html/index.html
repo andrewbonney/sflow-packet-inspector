@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>sFlow Packet Inspector</title>
+    <script type="text/javascript">
+      function reloadFrame() {
+        var iframe = document.getElementById('js-output-frame');
+        iframe.contentWindow.location.reload(true);
+      }
+      window.onload = function() {
+        var iframe = document.getElementById('js-output-frame');
+        iframe.onload = iframe.contentWindow.scrollTo(0, 999999);
+      }
+      setInterval(reloadFrame, 10000);
+    </script>
+  </head>
+  <body>
+    <iframe id="js-output-frame" src="output.html" style="position: absolute; height: 99%; width: 99%; border: none; margin: 0; padding: 0"></iframe>
+  </body>
+</html>
