@@ -46,7 +46,10 @@ class sFlowSample():
             SWITCHES[self.sflow_data["sw_agn_ip"]]["sample_rate"] = self.sflow_data["sample_rate"]
 
     def __getattr__(self, attr):
-        return self.sflow_data[attr]
+        if attr in self.sflow_data:
+            return self.sflow_data[attr]
+        else:
+            return self.__getattribute__(attr)
 
 
 class sFlowCounter():
@@ -88,7 +91,10 @@ class sFlowCounter():
         SWITCHES[self.sflow_data["sw_agn_ip"]]["interfaces"][int(self.sflow_data["if_index"])] = self.sflow_data
 
     def __getattr__(self, attr):
-        return self.sflow_data[attr]
+        if attr in self.sflow_data:
+            return self.sflow_data[attr]
+        else:
+            return self.__getattribute__(attr)
 
 
 class sFlowTestResult():
