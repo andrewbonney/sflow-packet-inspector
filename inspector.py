@@ -142,7 +142,7 @@ class sFlowTestResult():
 
 class sFlowTests():
     def testBadMAC(self, sample):
-        BAD_MACS = ["000000000000", "ffffffffffff"]
+        BAD_MACS = ["000000000000"]
         if sample.src_mac in BAD_MACS:
             return sFlowTestResult(True, "Src MAC is invalid", sample)
         elif sample.dst_mac in BAD_MACS:
