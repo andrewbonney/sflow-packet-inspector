@@ -148,6 +148,13 @@ class sFlowTests():
         elif sample.dst_mac in BAD_MACS:
             return sFlowTestResult(True, "Dest MAC is invalid", sample)
 
+        SUSPECT_MACS = ["deadbeef", "beefcafe"]
+        for mac in SUSPECT_MACS:
+            if mac in sample.src_mac:
+                return sFlowTestResult(True, "Src MAC may be spoofed with string '{}'".format(mac), sample)
+            elif mac in sample.dst_mac:
+                return sFlowTestResult(True, "Dest MAC may be spoofed with string '{}'".format(mac), sample)
+
         return sFlowTestResult(False)
 
     def testIncorrectMulticastMAC(self, sample):

@@ -7,7 +7,9 @@ This is intended for operation on small private networks.
 ## Issues Detected
 
 * Sending to an incorrect MAC address for a given multicast IP
+* Sending to a multicast MAC address without a multicast IP
 * Sending to or from an all 0x00 or all 0xff MAC address
+* Sending to or from common testing MACs such as 'deadbeef'
 * Error and discard counts increasing on switch ports
 
 ## TODO
