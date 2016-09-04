@@ -134,10 +134,13 @@ class sFlowTestResult():
         return self.error_present
 
     def getMessage(self):
+        return self.error_msg
+
+    def getDetail(self):
         if self.sample is not None:
-            return self.error_msg + "\n- {} {}->{} {}->{} {}->{}".format(self.sample.sw_agn_ip, self.sample.sw_in_port, self.sample.sw_out_port, self.sample.src_mac, self.sample.dst_mac, self.sample.src_ip, self.sample.dst_ip)
+            return "Agent: {} - Interface: {}->{} - MAC: {}->{} - IP: {}->{}".format(self.sample.sw_agn_ip, self.sample.sw_in_port, self.sample.sw_out_port, self.sample.src_mac, self.sample.dst_mac, self.sample.src_ip, self.sample.dst_ip)
         else:
-            return self.error_msg
+            return None
 
 
 class sFlowTests():
@@ -173,17 +176,17 @@ class sFlowTests():
 
 def writeMessage(type, message, output_file):
     styled_type = None
-    if type == "ERROR":
+    if type.startswith("ERROR"):
         styled_type = "<span style='color: #ff0000; font-weight: bold'>{}:</span>".format(type)
-    elif type == "WARNING":
+    elif type.startswith("WARNING"):
         styled_type = "<span style='color: #ffa500; font-weight: bold'>{}:</span>".format(type)
     else:
         type = "UNKNOWN"
         styled_type = "<span style='color: #000000; font-weight: bold'>{}:</span>".format(type)
 
     dt = datetime.datetime.now()
-    print "{} - {}: {}\n".format(dt, type, message)
-    output_file.write("{} - {} {}<br /><br />\n".format(dt, styled_type, message.replace("\n", "<br />\n")))
+    print "{} - {}: {}".format(dt, type, message)
+    output_file.write("{} - {} {}<br />\n".format(dt, styled_type, message))
 
 
 if __name__ == "__main__":
@@ -206,9 +209,11 @@ if __name__ == "__main__":
                     result = tests.testBadMAC(sample)
                     if result.isError():
                         writeMessage("ERROR", result.getMessage(), output_file)
+                        writeMessage("ERROR_DETAIL", result.getDetail(), output_file)
                     result = tests.testIncorrectMulticastMAC(sample)
                     if result.isError():
                         writeMessage("ERROR", result.getMessage(), output_file)
+                        writeMessage("ERROR_DETAIL", result.getDetail(), output_file)
                 elif new_line and new_line[0:4] == "CNTR":
                     sample = sFlowCounter(new_line)
                     errors = sample.getErrors()
