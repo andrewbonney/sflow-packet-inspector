@@ -8,6 +8,7 @@ This is intended for operation on small private networks.
 
 * Sending to an incorrect MAC address for a given multicast IP
 * Sending to or from an all 0x00 or all 0xff MAC address
+* Error and discard counts increasing on switch ports
 
 ## TODO
 

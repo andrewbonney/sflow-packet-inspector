@@ -80,6 +80,8 @@ class sFlowCounter():
         ]
 
         self.sflow_data = {}
+        self.prev_sflow_data = None
+
         index = 1
         for entry in counter_def:
             self.sflow_data[entry] = line_bits[index]
@@ -88,7 +90,10 @@ class sFlowCounter():
         if self.sw_agn_ip not in SWITCHES:
             SWITCHES[self.sflow_data["sw_agn_ip"]] = {"interfaces": [], "sample_rate": 4000}
         while len(SWITCHES[self.sflow_data["sw_agn_ip"]]["interfaces"]) < (int(self.sflow_data["if_index"]) + 1):
-            SWITCHES[self.sflow_data["sw_agn_ip"]]["interfaces"].append({})
+            SWITCHES[self.sflow_data["sw_agn_ip"]]["interfaces"].append(None)
+
+        if SWITCHES[self.sflow_data["sw_agn_ip"]]["interfaces"][int(self.sflow_data["if_index"])] is not None:
+            self.prev_sflow_data = SWITCHES[self.sflow_data["sw_agn_ip"]]["interfaces"][int(self.sflow_data["if_index"])]
 
         SWITCHES[self.sflow_data["sw_agn_ip"]]["interfaces"][int(self.sflow_data["if_index"])] = self.sflow_data
 
@@ -97,6 +102,26 @@ class sFlowCounter():
             return self.sflow_data[attr]
         else:
             return self.__getattribute__(attr)
+
+    def getErrors(self):
+        error_msg = []
+        if self.prev_sflow_data:
+            in_discard_change = int(self.sflow_data["if_in_discards"]) - int(self.prev_sflow_data["if_in_discards"])
+            if in_discard_change > 0:
+                error_msg.append("Input discards increased by {} for interface {} on agent {}".format(in_discard_change, self.sflow_data["if_index"], self.sflow_data["sw_agn_ip"]))
+            in_error_change = int(self.sflow_data["if_in_errors"]) - int(self.prev_sflow_data["if_in_errors"])
+            if in_error_change > 0:
+                error_msg.append("Input errors increased by {} for interface {} on agent {}".format(in_error_change, self.sflow_data["if_index"], self.sflow_data["sw_agn_ip"]))
+            in_unknown_protos_change = int(self.sflow_data["if_in_unknown_protos"]) - int(self.prev_sflow_data["if_in_unknown_protos"])
+            if in_unknown_protos_change > 0:
+                error_msg.append("Input unknown protocols increased by {} for interface {} on agent {}".format(in_unknown_protos_change, self.sflow_data["if_index"], self.sflow_data["sw_agn_ip"]))
+            out_discard_change = int(self.sflow_data["if_out_discards"]) - int(self.prev_sflow_data["if_out_discards"])
+            if out_discard_change > 0:
+                error_msg.append("Output discards increased by {} for interface {} on agent {}".format(out_discard_change, self.sflow_data["if_index"], self.sflow_data["sw_agn_ip"]))
+            out_error_change = int(self.sflow_data["if_out_errors"]) - int(self.prev_sflow_data["if_out_errors"])
+            if out_error_change > 0:
+                error_msg.append("Output errors increased by {} for interface {} on agent {}".format(out_error_change, self.sflow_data["if_index"], self.sflow_data["sw_agn_ip"]))
+        return error_msg
 
 
 class sFlowTestResult():
@@ -177,6 +202,9 @@ if __name__ == "__main__":
                         writeMessage("ERROR", result.getMessage(), output_file)
                 elif new_line and new_line[0:4] == "CNTR":
                     sample = sFlowCounter(new_line)
+                    errors = sample.getErrors()
+                    for error in errors:
+                        writeMessage("WARNING", error, output_file)
                 elif not new_line:
                     time.sleep(1)
         except Exception:
