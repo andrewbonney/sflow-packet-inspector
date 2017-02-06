@@ -200,9 +200,9 @@ if __name__ == "__main__":
         print "python inspector.py <sflow-file-name>"
     else:
         tests = sFlowTests()
-        output_file = open("html/output.html", "w", 0)
+        output_file = open(os.path.dirname(os.path.realpath(__file__)) + "/html/output.html", "w", 0)
         sflow_file = open(sys.argv[1], 'r')
-        os.chdir("html")
+        os.chdir(os.path.dirname(os.path.realpath(__file__)) + "/html")
         handler = SimpleHTTPServer.SimpleHTTPRequestHandler
         httpd = SocketServer.TCPServer(("", HTTP_PORT), handler)
         thread.start_new_thread(httpd.serve_forever, ())
