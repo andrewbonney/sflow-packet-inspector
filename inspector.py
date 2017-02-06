@@ -47,6 +47,12 @@ class sFlowSample():
         if self.sflow_data["sw_agn_ip"] in SWITCHES:
             SWITCHES[self.sflow_data["sw_agn_ip"]]["sample_rate"] = self.sflow_data["sample_rate"]
 
+    def ip_version(self):
+        if ":" in self.sflow_data["src_ip"]:
+            return "ipv6"
+        else:
+            return "ipv4"
+
     def __getattr__(self, attr):
         if attr in self.sflow_data:
             return self.sflow_data[attr]
@@ -161,7 +167,7 @@ class sFlowTests():
         return sFlowTestResult(False)
 
     def testIncorrectMulticastMAC(self, sample):
-        if int(sample.dst_ip.split(".")[0]) >= 224 and int(sample.dst_ip.split(".")[0]) <= 239:
+        if sample.ip_version() == "ipv4" and int(sample.dst_ip.split(".")[0]) >= 224 and int(sample.dst_ip.split(".")[0]) <= 239:
             if sample.dst_mac[0:6] != "01005e":
                 return sFlowTestResult(True, "Dest MAC is not a valid multicast MAC", sample)
             else:
