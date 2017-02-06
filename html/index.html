@@ -9,7 +9,7 @@
       }
       window.onload = function() {
         var iframe = document.getElementById('js-output-frame');
-        iframe.onload = iframe.contentWindow.scrollTo(0, 999999);
+        iframe.onload = iframe.contentWindow.scrollTo(0, iframe.contentWindow.document.body.offsetHeight);
       }
       setInterval(reloadFrame, 10000);
     </script>
