@@ -210,22 +210,29 @@ if __name__ == "__main__":
         try:
             while True:
                 new_line = sflow_file.readline()
-                if new_line and new_line[0:4] == "FLOW":
-                    sample = sFlowSample(new_line)
-                    result = tests.testBadMAC(sample)
-                    if result.isError():
-                        writeMessage("ERROR", result.getMessage(), output_file)
-                        writeMessage("ERROR_DETAIL", result.getDetail(), output_file)
-                    result = tests.testIncorrectMulticastMAC(sample)
-                    if result.isError():
-                        writeMessage("ERROR", result.getMessage(), output_file)
-                        writeMessage("ERROR_DETAIL", result.getDetail(), output_file)
-                elif new_line and new_line[0:4] == "CNTR":
-                    sample = sFlowCounter(new_line)
-                    errors = sample.getErrors()
-                    for error in errors:
-                        writeMessage("WARNING", error, output_file)
-                elif not new_line:
+                if new_line and len(new_line) > 4:
+                    if new_line[0:4] == "FLOW":
+                        try:
+                            sample = sFlowSample(new_line)
+                            result = tests.testBadMAC(sample)
+                            if result.isError():
+                                writeMessage("ERROR", result.getMessage(), output_file)
+                                writeMessage("ERROR_DETAIL", result.getDetail(), output_file)
+                            result = tests.testIncorrectMulticastMAC(sample)
+                            if result.isError():
+                                writeMessage("ERROR", result.getMessage(), output_file)
+                                writeMessage("ERROR_DETAIL", result.getDetail(), output_file)
+                        except IndexError:
+                            writeMessage("WARNING", "Invalid sFlow sample. May be end of file", output_file)
+                    elif new_line[0:4] == "CNTR":
+                        try:
+                            sample = sFlowCounter(new_line)
+                            errors = sample.getErrors()
+                            for error in errors:
+                                writeMessage("WARNING", error, output_file)
+                        except IndexError:
+                            writeMessage("WARNING", "Invalid sFlow sample. May be end of file", output_file)
+                else:
                     time.sleep(1)
         except Exception:
             sflow_file.close()
