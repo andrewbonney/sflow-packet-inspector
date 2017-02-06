@@ -223,7 +223,7 @@ if __name__ == "__main__":
                                 writeMessage("ERROR", result.getMessage(), output_file)
                                 writeMessage("ERROR_DETAIL", result.getDetail(), output_file)
                         except IndexError:
-                            writeMessage("WARNING", "Invalid sFlow sample. May be end of file", output_file)
+                            print "* Invalid sFlow sample. May be end of file. Ignoring"
                     elif new_line[0:4] == "CNTR":
                         try:
                             sample = sFlowCounter(new_line)
@@ -231,7 +231,7 @@ if __name__ == "__main__":
                             for error in errors:
                                 writeMessage("WARNING", error, output_file)
                         except IndexError:
-                            writeMessage("WARNING", "Invalid sFlow sample. May be end of file", output_file)
+                            print "* Invalid sFlow sample. May be end of file. Ignoring"
                 else:
                     time.sleep(1)
         except Exception:
