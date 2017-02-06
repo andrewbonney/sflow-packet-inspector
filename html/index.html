@@ -7,11 +7,12 @@
         var iframe = document.getElementById('js-output-frame');
         iframe.contentWindow.location.reload(true);
       }
-      window.onload = function() {
+      function scrollFrame() {
         var iframe = document.getElementById('js-output-frame');
         iframe.onload = iframe.contentWindow.scrollTo(0, iframe.contentWindow.document.body.offsetHeight);
       }
       setInterval(reloadFrame, 10000);
+      setInterval(scrollFrame, 100);
     </script>
   </head>
   <body>
