@@ -209,7 +209,9 @@ class Writer():
         while len(self.html_lines) > HTML_LINES:
             del self.html_lines[0]
 
-        # Write out live file max once per second due to full re-write overhead
+        self.flushBuffer()
+
+    def flushBuffer(self):
         if int(time.time()) > (self.last_write+1):
             self.last_write = int(time.time())
             with open(os.path.dirname(os.path.realpath(__file__)) + "/" + self.output_part, "w", 0) as partial_output:
@@ -255,6 +257,7 @@ if __name__ == "__main__":
                             print "{} - INFO: Invalid sFlow sample. May be end of file. Ignoring".format(datetime.datetime.now())
                 else:
                     print "{} - INFO: Waiting for new data...".format(datetime.datetime.now())
+                    writer.flushBuffer()
                     time.sleep(1)
         except Exception:
             sflow_file.close()
