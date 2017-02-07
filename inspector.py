@@ -43,7 +43,7 @@ class sFlowSample():
         self.sflow_data = {}
         index = 1
         for entry in sample_def:
-            self.sflow_data[entry] = line_bits[index]
+            self.sflow_data[entry] = line_bits[index].lower()
             index += 1
 
         if self.sflow_data["sw_agn_ip"] in SWITCHES:
@@ -171,9 +171,16 @@ class sFlowTests():
     def testIncorrectMulticastMAC(self, sample):
         if sample.ip_version() == "ipv4" and int(sample.dst_ip.split(".")[0]) >= 224 and int(sample.dst_ip.split(".")[0]) <= 239:
             if sample.dst_mac[0:6] != "01005e":
-                return sFlowTestResult(True, "Dest MAC is not a valid multicast MAC", sample)
+                return sFlowTestResult(True, "Dest MAC is not a valid IPv4 multicast MAC", sample)
             else:
                 correct_mac = "01005e" + hex(int(sample.dst_ip.split(".")[1]) & 0x7F)[2:].zfill(2) + hex(int(sample.dst_ip.split(".")[2]))[2:].zfill(2) + hex(int(sample.dst_ip.split(".")[3]))[2:].zfill(2)
+                if sample.dst_mac != correct_mac:
+                    return sFlowTestResult(True, "Dest MAC does not match the multicast IP address", sample)
+        elif sample.ip_version() == "ipv6" and sample.dst_ip.split(":")[0][0:2] == "ff" and sample.dst_ip.split(":")[0][2] != "0" and sample.dst_ip.split(":")[0][3] in ["2", "3", "4", "5", "8"]:
+            if sample.dst_mac[0:4] != "3333":
+                return sFlowTestResult(True, "Dest MAC is not a valid IPv6 multicast MAC", sample)
+            else:
+                correct_mac = "3333" + sample.dst_ip.split(":")[6].zfill(4) + sample.dst_ip.split(":")[7].zfill(4)
                 if sample.dst_mac != correct_mac:
                     return sFlowTestResult(True, "Dest MAC does not match the multicast IP address", sample)
         elif int(sample.dst_mac[1], 16) & 0x1 == 1 and sample.dst_mac != "ffffffffffff":
