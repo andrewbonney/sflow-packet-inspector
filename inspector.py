@@ -11,6 +11,8 @@ import datetime
 
 HTTP_PORT=8000
 
+HTML_LINES=1000
+
 SWITCHES={}
 
 class sFlowSample():
@@ -179,20 +181,39 @@ class sFlowTests():
 
         return sFlowTestResult(False)
 
+class Writer():
+    def __init__(self, output_full, output_part):
+        self.output_part = output_part
+        self.output_file = open(os.path.dirname(os.path.realpath(__file__)) + "/" + output_full, "w", 0)
+        self.last_write = 0
+        self.html_lines = []
 
-def writeMessage(type, message, output_file):
-    styled_type = None
-    if type.startswith("ERROR"):
-        styled_type = "<span style='color: #ff0000; font-weight: bold'>{}:</span>".format(type)
-    elif type.startswith("WARNING"):
-        styled_type = "<span style='color: #ffa500; font-weight: bold'>{}:</span>".format(type)
-    else:
-        type = "UNKNOWN"
-        styled_type = "<span style='color: #000000; font-weight: bold'>{}:</span>".format(type)
+    def close(self):
+        self.output_file.close()
 
-    dt = datetime.datetime.now()
-    print "{} - {}: {}".format(dt, type, message)
-    output_file.write("{} - {} {}<br />\n".format(dt, styled_type, message))
+    def writeMessage(self, type, message):
+        styled_type = None
+        if type.startswith("ERROR"):
+            styled_type = "<span style='color: #ff0000; font-weight: bold'>{}:</span>".format(type)
+        elif type.startswith("WARNING"):
+            styled_type = "<span style='color: #ffa500; font-weight: bold'>{}:</span>".format(type)
+        else:
+            type = "UNKNOWN"
+            styled_type = "<span style='color: #000000; font-weight: bold'>{}:</span>".format(type)
+
+        dt = datetime.datetime.now()
+        print "{} - {}: {}".format(dt, type, message)
+        self.output_file.write("{} - {} {}<br />\n".format(dt, styled_type, message))
+
+        self.html_lines.append("{} - {} {}<br />\n".format(dt, styled_type, message))
+        while len(self.html_lines) > HTML_LINES:
+            del self.html_lines[0]
+
+        # Write out live file max once per second due to full re-write overhead
+        if int(time.time()) > (self.last_write+1):
+            self.last_write = int(time.time())
+            with open(os.path.dirname(os.path.realpath(__file__)) + "/" + self.output_part, "w", 0) as partial_output:
+                partial_output.write("".join(self.html_lines))
 
 
 if __name__ == "__main__":
@@ -200,9 +221,9 @@ if __name__ == "__main__":
         print "python inspector.py <sflow-file-name>"
     else:
         tests = sFlowTests()
-        output_file = open(os.path.dirname(os.path.realpath(__file__)) + "/html/output.html", "w", 0)
         sflow_file = open(sys.argv[1], 'r')
         os.chdir(os.path.dirname(os.path.realpath(__file__)) + "/html")
+        writer = Writer("output_full.html", "output.html")
         handler = SimpleHTTPServer.SimpleHTTPRequestHandler
         httpd = SocketServer.TCPServer(("", HTTP_PORT), handler)
         thread.start_new_thread(httpd.serve_forever, ())
@@ -216,12 +237,12 @@ if __name__ == "__main__":
                             sample = sFlowSample(new_line)
                             result = tests.testBadMAC(sample)
                             if result.isError():
-                                writeMessage("ERROR", result.getMessage(), output_file)
-                                writeMessage("ERROR_DETAIL", result.getDetail(), output_file)
+                                writer.writeMessage("ERROR", result.getMessage())
+                                writer.writeMessage("ERROR_DETAIL", result.getDetail())
                             result = tests.testIncorrectMulticastMAC(sample)
                             if result.isError():
-                                writeMessage("ERROR", result.getMessage(), output_file)
-                                writeMessage("ERROR_DETAIL", result.getDetail(), output_file)
+                                writer.writeMessage("ERROR", result.getMessage())
+                                writer.writeMessage("ERROR_DETAIL", result.getDetail())
                         except IndexError:
                             print "{} - INFO: Invalid sFlow sample. May be end of file. Ignoring".format(datetime.datetime.now())
                     elif new_line[0:4] == "CNTR":
@@ -229,7 +250,7 @@ if __name__ == "__main__":
                             sample = sFlowCounter(new_line)
                             errors = sample.getErrors()
                             for error in errors:
-                                writeMessage("WARNING", error, output_file)
+                                writer.writeMessage("WARNING", error)
                         except IndexError:
                             print "{} - INFO: Invalid sFlow sample. May be end of file. Ignoring".format(datetime.datetime.now())
                 else:
@@ -237,7 +258,7 @@ if __name__ == "__main__":
                     time.sleep(1)
         except Exception:
             sflow_file.close()
-            output_file.close()
+            writer.close()
             httpd.shutdown()
             httpd.server_close()
             traceback.print_exc()
