@@ -3,19 +3,38 @@
   <head>
     <title>sFlow Packet Inspector</title>
     <script type="text/javascript">
+      var paused = false;
       function reloadFrame() {
-        var iframe = document.getElementById('js-output-frame');
-        iframe.contentWindow.location.reload(true);
+        if (!paused) {
+          var iframe = document.getElementById('js-output-frame');
+          iframe.contentWindow.location.reload(true);
+        }
       }
       function scrollFrame() {
-        var iframe = document.getElementById('js-output-frame');
-        iframe.onload = iframe.contentWindow.scrollTo(0, iframe.contentWindow.document.body.offsetHeight);
+        if (!paused) {
+          var iframe = document.getElementById('js-output-frame');
+          iframe.onload = iframe.contentWindow.scrollTo(0, iframe.contentWindow.document.body.offsetHeight);
+        }
+      }
+      function pauseRefresh() {
+        if (!paused) {
+          document.getElementById("js-pause").innerHTML = "Activate Refresh";
+          paused = true;
+        } else {
+          document.getElementById("js-pause").innerHTML = "Deactivate Refresh";
+          paused = false;
+        }
       }
       setInterval(reloadFrame, 10000);
       setInterval(scrollFrame, 100);
     </script>
   </head>
   <body>
-    <iframe id="js-output-frame" src="output.html" style="position: absolute; height: 99%; width: 99%; border: none; margin: 0; padding: 0"></iframe>
+    <div style="width: 100%; height: 5%; text-align: center">
+      <button id="js-pause" onclick="pauseRefresh()">Deactivate Refresh</button>
+    </div>
+    <div>
+      <iframe id="js-output-frame" src="output.html" style="position: absolute; height: 95%; width: 99%; border: none; margin: 0; padding: 0"></iframe>
+    </div>
   </body>
 </html>
