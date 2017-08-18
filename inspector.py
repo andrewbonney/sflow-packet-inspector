@@ -252,7 +252,7 @@ if __name__ == "__main__":
                             if result.isError():
                                 writer.writeMessage("ERROR", result.getMessage())
                                 writer.writeMessage("ERROR_DETAIL", result.getDetail())
-                        except IndexError:
+                        except (IndexError, ValueError):
                             print "{} - INFO: Invalid sFlow sample. May be end of file. Ignoring".format(datetime.datetime.now())
                     elif new_line[0:4] == "CNTR":
                         try:
@@ -260,7 +260,7 @@ if __name__ == "__main__":
                             errors = sample.getErrors()
                             for error in errors:
                                 writer.writeMessage("WARNING", error)
-                        except IndexError:
+                        except (IndexError, ValueError):
                             print "{} - INFO: Invalid sFlow sample. May be end of file. Ignoring".format(datetime.datetime.now())
                 else:
                     print "{} - INFO: Waiting for new data...".format(datetime.datetime.now())
