@@ -16,4 +16,15 @@ This is intended for operation on small private networks.
 
 * Sending high volume multicast to groups not in the 232 or 239 ranges
 
-Further issue detection will be added at a later date.
+Further issue detection may be added at a later date.
+
+## Requirements
+
+* Linux (untested on Windows and Mac)
+* Python 2.7
+
+## Usage
+
+```shell
+$ python inspector.py <sflow-filename>
+```
