@@ -6,22 +6,22 @@ This is intended for operation on small private networks.
 
 ## Issues Detected
 
-* Sending to an incorrect MAC address for a given multicast IP
-* Sending to a multicast MAC address without a multicast IP
-* Sending to or from an all 0x00 MAC address
-* Sending to or from common testing MACs such as 'deadbeef'
-* Error and discard counts increasing on switch ports
+*   Sending to an incorrect MAC address for a given multicast IP
+*   Sending to a multicast MAC address without a multicast IP
+*   Sending to or from an all 0x00 MAC address
+*   Sending to or from common testing MACs such as 'deadbeef'
+*   Error and discard counts increasing on switch ports
 
 ## TODO
 
-* Sending high volume multicast to groups not in the 232 or 239 ranges
+*   Sending high volume multicast to groups not in the 232 or 239 ranges
 
 Further issue detection may be added at a later date.
 
 ## Requirements
 
-* Linux (untested on Windows and Mac)
-* Python 2.7
+*   Linux (untested on Windows and Mac)
+*   Python 2.7
 
 ## Usage
 
